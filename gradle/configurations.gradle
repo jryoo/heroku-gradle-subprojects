@@ -1,0 +1,4 @@
+configurations {
+    all*.exclude group: "org.apache.logging.log4j", module: "*"
+}
+

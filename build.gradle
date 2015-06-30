@@ -1,0 +1,40 @@
+ext.githubProjectName = rootProject.name
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+apply from: file('gradle/configurations.gradle')
+
+subprojects {
+    apply plugin: 'maven'
+    apply plugin: 'application'
+    group = 'com.github.jryoo'
+    dependencies {
+        compile 'io.dropwizard:dropwizard-core:0.8.1'
+    }
+}
+
+def runtimeProjectName = "project"
+def runtimeDestination = "$rootDir/build/$runtimeProjectName"
+def theMainClassName = ["project-one": "com.github.jryoo.ServerOne", "project-two": "com.github.jryoo.ServerTwo"]
+
+
+project(":$System.env.PROJECT") {
+    mainClassName = theMainClassName[System.env.PROJECT]
+    task stage(dependsOn: ['clean', 'installDist'])
+    installDist {
+        doLast {
+            mkdir(runtimeDestination)
+            copy {
+                from "$projectDir"
+                into "$runtimeDestination"
+            }
+            file("$runtimeDestination/build/install/$System.env.PROJECT").renameTo(file("$runtimeDestination/build/install/$runtimeProjectName"))
+            file("$runtimeDestination/build/install/$runtimeProjectName/bin/$System.env.PROJECT").renameTo(file("$runtimeDestination/build/install/$runtimeProjectName/bin/$runtimeProjectName"))
+            file("$runtimeDestination/build/install/$runtimeProjectName/bin/$System.env.PROJECT" +".bat").renameTo(file("$runtimeDestination/build/install/$runtimeProjectName/bin/$runtimeProjectName" + ".bat"))
+        }
+    }
+}
